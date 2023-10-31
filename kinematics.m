@@ -9,11 +9,20 @@ check(rot)
 
 
 
-function mat = direct()
-
+function mat = direct(theta,alpha,d,num,base)
+    mat = base
+    for i = 1:num
+        mat = mat * dh(alpha[i],theta[i],d[i]);
+        simplify(mat);
+    end
 end
 
-function mdh = dh()
+function mdh = dh(a,t,d)
+    mdh = [cos(t),  -cos(a)*sin(t),     sin(a)*sin(t),     a*cos(t);
+           sin(t),   cos(a)*cos(t),    -sin(a)*cos(t),     a*sin(t);
+           0,               sin(a),            cos(a),            d;
+           0                     0,                 0,            1]
+end
 
 function bool = check(m)
     deter = int64(det(m)) == 1;
