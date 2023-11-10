@@ -1,27 +1,35 @@
-Ri = [sqrt(2)/2,0,sqrt(2)/2;
-      0,-1,0;
-      sqrt(2)/2,0,-sqrt(2)/2]
-Rf = x_m(-pi/2)*y_m(pi/3)*z_m(pi/3)
+% Ri = [sqrt(2)/2,0,sqrt(2)/2;
+%       0,-1,0;
+%       sqrt(2)/2,0,-sqrt(2)/2]
+% Rf = x_m(-pi/2)*y_m(pi/3)*z_m(pi/3)
+% 
+% rot = Ri.'*Rf
+% 
+% check(rot)
+format long
+syms q1 q2 q3 d1 a3
+syms a1 o1 d1 t1
+dh(sym(-pi/2),0,0,0)
+y_m(sym(-pi/2))*x_m(sym(-pi/2))
+meeee = dh(sym(-pi/2),0,0,0) * direct(sym([0,q2,0]),sym([pi/2,-pi/2,0]),[q1,0,q3],[0,0,0],3)  * [0 1 0 0;0 0 1 0; 1 0 0 0; 0 0 0 1]
+%m = direct(sym([0,0,q2,0,0]),sym([-pi/2,pi/2,pi/2,0,0]),[0,q1,0,q3,0],[0,0,0,0,0],5);
 
-rot = Ri.'*Rf
+function mat = direct(theta,alpha,d,a,num)
 
-check(rot)
+    mat = dh(alpha(1),theta(1),d(1),a(1))
 
-
-
-function mat = direct(theta,alpha,d,num,base)
-    mat = base
-    for i = 1:num
-        mat = mat * dh(alpha[i],theta[i],d[i]);
+    for i = 2:num
+        dh(alpha(i),theta(i),d(i),a(i))
+        mat = mat * dh(alpha(i),theta(i),d(i),a(i));
         simplify(mat);
     end
 end
 
-function mdh = dh(a,t,d)
-    mdh = [cos(t),  -cos(a)*sin(t),     sin(a)*sin(t),     a*cos(t);
-           sin(t),   cos(a)*cos(t),    -sin(a)*cos(t),     a*sin(t);
-           0,               sin(a),            cos(a),            d;
-           0                     0,                 0,            1]
+function mdh = dh(alpha,t,d,a)
+    mdh = [cos(t),  -cos(alpha)*sin(t),     sin(alpha)*sin(t),     a*cos(t);
+           sin(t),   cos(alpha)*cos(t),    -sin(alpha)*cos(t),     a*sin(t);
+           0,               sin(alpha),            cos(alpha),            d;
+           0                     0,                 0,            1];
 end
 
 function bool = check(m)

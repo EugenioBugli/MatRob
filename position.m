@@ -9,16 +9,33 @@ syms psi
 % when you solve the direct problem remember to express the vector respect
 % to 0RF so you need to compute this : Ri * direction
 
-Ri = [sqrt(2)/2,0,sqrt(2)/2;
-      0,-1,0;
-      sqrt(2)/2,0,-sqrt(2)/2]
-Rf = x_m(-pi/2)*y_m(pi/3)*z_m(pi/3)
+% Ri = [sqrt(2)/2,0,sqrt(2)/2;
+%       0,-1,0;
+%       sqrt(2)/2,0,-sqrt(2)/2]
+% Rf = x_m(-pi/2)*y_m(pi/3)*z_m(pi/3)
+% 
+% rot = Ri.'*Rf
+% 
+% dir = inv_pos(rot)
+% 
+% Ri * dir
 
-rot = Ri.'*Rf
+Ri = [1 0 0 -1;
+      0 -1 0 1;
+      0 0 -1 3.5;
+      0 0 0 1;]
 
-dir = inv_pos(rot)
+Rf = [1/sqrt(2) 0 -1/sqrt(2) 2;
+      0 -1 0 0;
+      -1/sqrt(2) 0 -1/sqrt(2) 2;
+      0 0 0 1;]
+R = Ri.' * Rf
 
-Ri * dir
+%z_m(phi)*y_m(theta)*z_m(psi);
+
+%eul = rotm2eul(R,"ZYZ")
+
+% r = eul2rotm([1.5708   -1.5708   -0.5236], "ZYZ")
 
 function rot = dir_pos(angle,dir)
     display(dir)
