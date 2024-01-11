@@ -7,12 +7,82 @@
 % 
 % check(rot)
 format long
-syms q1 q2 q3 d1 a3
-syms a1 o1 d1 t1
-dh(sym(-pi/2),0,0,0)
-y_m(sym(-pi/2))*x_m(sym(-pi/2))
-meeee = dh(sym(-pi/2),0,0,0) * direct(sym([0,q2,0]),sym([pi/2,-pi/2,0]),[q1,0,q3],[0,0,0],3)  * [0 1 0 0;0 0 1 0; 1 0 0 0; 0 0 0 1]
-%m = direct(sym([0,0,q2,0,0]),sym([-pi/2,pi/2,pi/2,0,0]),[0,q1,0,q3,0],[0,0,0,0,0],5);
+syms q1 q2 q3 q4 q5 q6
+syms a1 a2 a3 a4
+syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2 t
+
+Jac = [-sin(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*cos(q1)*sin(q2) -l3*cos(q1)*sin(q3);
+      cos(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*sin(q1)*sin(q2) -l3*sin(q1)*sin(q3);
+      0 l2*cos(q2) l3*cos(q3)]
+
+R01 = z_m(q1)
+J1 = simplify(R01.' * Jac)
+simplify(simplify(det(J1)))
+
+rank2 = simplify(subs(Jac, [q2], [q3]))
+rank(rank2)
+
+rank1 = simplify(subs(rank2, [q3], [pi/2]))
+rank(rank1)
+
+null(rank1)
+colspace(rank1)
+null(rank1.')
+colspace(rank1.')
+
+% % % T01 = direct(sym([q1]),sym([pi/2]),[A],[B],1)
+% % % R01 = T01(1:3,1:3)
+% % % J1 = simplify(R01.' * Jacobian)
+% % % subs(J1, [B,D], [0,0])
+
+% rangespace = simplify(colspace(sing))
+% nullspace = simplify(null(sing))
+
+
+% % sing = simplify(subs(Jacobian, [B,D], [0,0]))
+% % Jac1 = simplify(R01.'*sing)
+% % m = simplify(sing*sing.')
+% % simplify(det(m))
+% % 
+% % nullspace = simplify(null(sing))
+% % rangespace = simplify(colspace(sing))
+% % nulltransposed = simplify(null(sing.'))
+
+% R04 = direct(sym([0,q2,0,q4]),sym([0,-pi/2,0,0]),[q1,0,q3,0],[0,N,0,0],4)
+% p04 = R04(1:3,4)
+
+
+% % T02 = direct(sym([q1,q2]),sym([0,-pi/2]),[0,0],[L1,L2],2)
+% % simplify(T02)
+% % 
+% % T02n = direct(sym([pi/2,-pi/2]),sym([0,-pi/2]),[0,0],[0.5,0.6],2)
+
+% T02 = direct([0,q2,q3],sym([pi/2,0,0]),[q1,0,0],[0,L,L],3);
+% simplify(T02);
+
+% pos = [q1 + L*cos(q2) + L*cos(q2+q3); L*sin(q2) + L*sin(q2+q3); q2+q3]
+% Jacobian = [diff(pos,q1),diff(pos,q2), diff(pos,q3)]
+% jacobian(pos, [q1,q2,q3])
+% pos = [q2*cos(q1) + q4*cos(q1+q3); q2*sin(q1) + q4*sin(q1+q3); q1+q3]
+% Jacobian = jacobian(pos, [q1,q2,q3,q4])
+% det(Jacobian)
+% simplify(det(simplify(Jacobian*Jacobian.')))
+% sing = simplify(subs(Jacobian, [q2,q3], [0,0]))
+% sing = Jacobian
+% rank = rank(sing)
+% nullspace = simplify(null(sing))
+% rangespace = simplify(colspace(sing))
+% nulltransposed = simplify(null(sing.'))
+% 
+% r = [1;0;0]
+% inv = simplify(pinv(sing))
+% 
+% q = inv * r
+% 
+% ver = simplify(sing*q)
+
+% v = [L*cos(q1); K*q1; L*sin(q1)]
+% simplify(norm(v))
 
 function mat = direct(theta,alpha,d,a,num)
 

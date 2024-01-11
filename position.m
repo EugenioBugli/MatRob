@@ -1,14 +1,21 @@
 syms phi
 syms theta
 syms psi
+syms a
 
 % vector invariant to rotation --> eigenvector of eigenvalue 1 : [V,D] =
-% eig(rot) where V return diagonal matrix with eigenvalues, while D
+% eig(rot) where D return diagonal matrix with eigenvalues, while V
 % represent the eigenvectors of the 3 eigenvalues.
 
 % when you solve the direct problem remember to express the vector respect
 % to 0RF so you need to compute this : Ri * direction
+R2 = 0.5*[sqrt(2) 1 -1;
+      0 -sqrt(2) -sqrt(2);
+      -sqrt(2) 1 -1]
 
+Rvia = [sqrt(6)/4 sqrt(2)/4 -sqrt(2)/2;
+        -sqrt(6)/4 -sqrt(2)/4 -sqrt(2)/2;
+        -0.5 sqrt(3)/2 0]
 % Ri = [sqrt(2)/2,0,sqrt(2)/2;
 %       0,-1,0;
 %       sqrt(2)/2,0,-sqrt(2)/2]
@@ -19,24 +26,14 @@ syms psi
 % dir = inv_pos(rot)
 % 
 % Ri * dir
+% Remember that when you return the direction vector you need to express it
+% in frame 0 coordinates : Ri * vector obtained from inv_pos
 
-Ri = [1 0 0 -1;
-      0 -1 0 1;
-      0 0 -1 3.5;
-      0 0 0 1;]
-
-Rf = [1/sqrt(2) 0 -1/sqrt(2) 2;
-      0 -1 0 0;
-      -1/sqrt(2) 0 -1/sqrt(2) 2;
-      0 0 0 1;]
-R = Ri.' * Rf
-
-%z_m(phi)*y_m(theta)*z_m(psi);
-
-%eul = rotm2eul(R,"ZYZ")
-
-% r = eul2rotm([1.5708   -1.5708   -0.5236], "ZYZ")
-
+% r = (1/sqrt(2)) * [1;-1;0]
+% Rx = x_m(deg2rad(-90))
+% r_n = Rx * r
+% Rot = dir_pos(deg2rad(60),r_n)
+% dir = inv_pos(Rot)
 function rot = dir_pos(angle,dir)
     display(dir)
     display(angle)
@@ -70,7 +67,9 @@ function direction = inv_pos(r_mat)
             dir_2 = dir / (2*sin(atan2(k,x)));
             direction = [dir_1, dir_2];
         end
+        display("Radiant")
         display(angles)
+        display("Degree")
         display(rad2deg(angles))
     else
         display("Det is not equal to 1")

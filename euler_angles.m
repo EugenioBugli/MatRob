@@ -1,21 +1,51 @@
 syms phi
 syms theta
 syms psi
+syms alpha beta
 
-mat1 = x_m(phi);
-mat2 = z_m(theta);
-mat3 = y_m(psi);
+% mat1 = z_m(phi);
+% mat2 = y_m(theta);
+% mat3 = x_m(psi);
+% mat1*mat2*mat3
 
 display("Remember to use inverse order if the axes are fixed (i.e RPY angles)")
+display("You may use wrapToPi to transform your angles in [-pi,pi] (note that we use (-pi,pi])")
 
-mat1 * mat2 * mat3
+R = [0 -sqrt(2)/2 sqrt(2)/2;
+    1 0 0;
+    0 sqrt(2)/2 sqrt(2)/2]
+R2 = 0.5*[sqrt(2) 1 -1;
+      0 -sqrt(2) -sqrt(2);
+      -sqrt(2) 1 -1]
 
-R = [0.7292 -0.6124 -0.2803;
-    0.5732 0.3536 0.7392;
-    0.3536 -0.7071 0.6124]
+Rvia = [sqrt(6)/4 sqrt(2)/4 -sqrt(2)/2;
+        -sqrt(6)/4 -sqrt(2)/4 -sqrt(2)/2;
+        -0.5 sqrt(3)/2 0]
 
-angles = rot_eul(R, "XZY");
-[a,b] = rotm2eul(R, "XZY")
+angles = rot_eul(Rvia, "ZYX");
+[a,b] = rotm2eul(Rvia, "ZYX")
+display("mtlb function with degrees")
+rad2deg(a)
+rad2deg(b)
+% 
+% R = x_m(sym(pi/4))*y_m(sym(-pi/4))*z_m(sym(-pi/2))
+% [V,D] = eig(R)
+
+% Ri = [0 0.5 -sqrt(3)/2; -1 0 0; 0 sqrt(3)/2 0.5]
+% R = Ri.' * eye(3)
+% an = rot_eul(R, "ZYZ");
+% [a,b] = rotm2eul(R, "ZYZ")
+% wrapToPi(a)
+
+% Rp = z_m(alpha)*y_m(beta)
+% rp = z_m(deg2rad(45))*y_m(-deg2rad(60))
+% rot = x_m(phi)*y_m(theta)*z_m(psi)
+% 
+% an = rot_eul(rp, "XYZ");
+% [a,b] = rotm2eul(rp, "XYZ")
+% 
+% Rfin1 = x_m(0.8861)*y_m(-0.6591)*z_m(1.1071)
+% Rfin2 = x_m(-2.2555)*y_m(-2.4825)*z_m(-2.0344)
 
 function angles = rot_eul(R,seq)
     %----------------------------------
