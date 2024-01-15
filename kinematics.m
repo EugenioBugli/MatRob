@@ -6,29 +6,44 @@
 % rot = Ri.'*Rf
 % 
 % check(rot)
+clc
 format long
 syms q1 q2 q3 q4 q5 q6
 syms a1 a2 a3 a4
-syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2 t
+syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2
+syms t q1(t) q2(t) q3(t) alpha beta gamma
 
-Jac = [-sin(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*cos(q1)*sin(q2) -l3*cos(q1)*sin(q3);
-      cos(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*sin(q1)*sin(q2) -l3*sin(q1)*sin(q3);
-      0 l2*cos(q2) l3*cos(q3)]
+R = y_m(q3(t))*z_m(q2(t))*y_m(q1(t))
+Rdot = simplify(diff(R, t))
+Rdot1 = simplify(subs(Rdot, [diff(q1(t),t),diff(q2(t),t),diff(q3(t),t)], [alpha,beta,gamma]))
+Rdot2 = simplify(subs(Rdot1, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
+R2 = simplify(subs(R, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
+skews = simplify(Rdot2* R2.')
+w = skewTovec(skews)
 
-R01 = z_m(q1)
-J1 = simplify(R01.' * Jac)
-simplify(simplify(det(J1)))
+x = [alpha, beta, gamma]
+A = equationsToMatrix(w, x)
 
-rank2 = simplify(subs(Jac, [q2], [q3]))
-rank(rank2)
+ObtainfromOrientation(R, 'YZY', [t, q1(t), q2(t), q3(t), alpha, beta, gamma, d1, d2, d3], 'RPY')
 
-rank1 = simplify(subs(rank2, [q3], [pi/2]))
-rank(rank1)
-
-null(rank1)
-colspace(rank1)
-null(rank1.')
-colspace(rank1.')
+% Jac = [-sin(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*cos(q1)*sin(q2) -l3*cos(q1)*sin(q3);
+%       cos(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*sin(q1)*sin(q2) -l3*sin(q1)*sin(q3);
+%       0 l2*cos(q2) l3*cos(q3)]
+% 
+% R01 = z_m(q1)
+% J1 = simplify(R01.' * Jac)
+% simplify(simplify(det(J1)))
+% 
+% rank2 = simplify(subs(Jac, [q2], [q3]))
+% rank(rank2)
+% 
+% rank1 = simplify(subs(rank2, [q3], [pi/2]))
+% rank(rank1)
+% 
+% null(rank1)
+% colspace(rank1)
+% null(rank1.')
+% colspace(rank1.')
 
 % % % T01 = direct(sym([q1]),sym([pi/2]),[A],[B],1)
 % % % R01 = T01(1:3,1:3)
@@ -83,6 +98,97 @@ colspace(rank1.')
 
 % v = [L*cos(q1); K*q1; L*sin(q1)]
 % simplify(norm(v))
+function ObtainfromOrientation(R, seq, vars, typ)
+    display('If RPY double check the correct order!')
+    t = vars(1);
+    q2(t) = vars(3);
+    if typ == 'RPY'
+        fprintf('RPY case so: \n q1(t) is gamma \n q2(t) is beta \n q3(t) is alpha \n')
+        q1(t) = vars(4);
+        q3(t) = vars(2);
+        alpha = vars(7);
+        gamma = vars(5);
+        d1 = vars(10);
+        d3 = vars(8);
+    else
+        q1(t) = vars(2);
+        q3(t) = vars(4);
+        alpha = vars(5);
+        gamma = vars(7);
+        d1 = vars(8);
+        d3 = vars(10);
+    end
+    
+    beta = vars(6);
+    d2 = vars(9);
+
+    if seq == 'XYZ'
+        m = x_m(q1(t))*y_m(q2(t))*z_m(q3(t))
+    elseif seq == 'XZY'
+        m = x_m(q1(t))*z_m(q2(t))*y_m(q3(t))
+    elseif seq == 'XYX'
+        m = x_m(q1(t))*y_m(q2(t))*x_m(q3(t))
+    elseif seq == 'XZX'
+        m = x_m(q1(t))*z_m(q2(t))*x_m(q3(t))
+
+    elseif seq == 'YXZ'
+        m = y_m(q1(t))*x_m(q2(t))*z_m(q3(t))
+    elseif seq == 'YZX'
+        m = y_m(q1(t))*z_m(q2(t))*x_m(q3(t))
+    elseif seq == 'YXY'
+        m = y_m(q1(t))*x_m(q2(t))*y_m(q3(t))
+    elseif seq == 'YZY'
+        m = y_m(q1(t))*z_m(q2(t))*y_m(q3(t))
+
+    elseif seq == 'ZXY'
+        m = z_m(q1(t))*x_m(q2(t))*y_m(q3(t))
+    elseif seq == 'ZYX'
+        m = z_m(q1(t))*y_m(q2(t))*x_m(q3(t))
+    elseif seq == 'ZXZ'
+        m = z_m(q1(t))*x_m(q2(t))*z_m(q3(t))
+    elseif seq == 'ZYZ'
+        m = z_m(q1(t))*y_m(q2(t))*z_m(q3(t))
+    end
+    
+    mdot = simplify(diff(m,t))
+    display('derivatives of q1(t), q2(t), q3(t) are now called alpha, beta, gamma')
+    mdot1 = simplify(subs(mdot, [diff(q1(t),t),diff(q2(t),t),diff(q3(t),t)], [alpha,beta,gamma]));
+    display('q1(t), q2(t), q3(t) are the now d1, d2, d3')
+    mdot2 = simplify(subs(mdot1, [q1(t),q2(t),q3(t)], [d1, d2, d3]));
+    
+    if typ == 'RPY'
+        fprintf('RPY case so: \n q1dot(t) is gamma \n q2dot(t) is beta \n q3dot(t) is alpha \n\n q1(t) is d3 \n q2(t) is d2 \n q3(t) is d1 \n')
+    end
+    
+    m2 = simplify(subs(m, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
+    display('Compute S(w) = Rdot * R^T \n')
+    S = simplify(mdot2*m2.')
+    display('decompose it in a vector \n')
+    w = skewTovec(S)
+    display('Given Ax = b with x = [alpha, beta, gamma] and b = w, here you have A \n')
+    if typ == 'RPY'
+        x = [gamma, beta, alpha]
+    else 
+        x = [alpha, beta, gamma]
+    end
+
+    A = equationsToMatrix(w, x)
+
+end
+
+function mat = GeometricJacobian(pos, param)
+end
+
+function mat = AnalyticJacobian(pos, param)
+    display('Normal Jacobian')
+    mat = jacobian(pos, param)
+    simplify(det(mat))
+    R01 = z_m(q1);
+    display('Jacobian expressed in frame 1')
+    mat1 = simplify(R01.' * mat)
+    simplify(det(mat1))
+    solve(simplify(det(mat1))==0)
+end
 
 function mat = direct(theta,alpha,d,a,num)
 
@@ -126,4 +232,8 @@ function s = skew(r)
 s = [0,-r(3),r(2);
      r(3),0,-r(1);
      -r(2),r(1),0];
+end
+
+function w = skewTovec(S)
+w = [S(3,2); S(1,3);S(2,1)];
 end
