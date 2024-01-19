@@ -13,7 +13,7 @@ syms a1 a2 a3 a4
 syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2
 syms t q1(t) q2(t) q3(t) alpha beta gamma
 
-R = y_m(q3(t))*z_m(q2(t))*y_m(q1(t))
+R = y_m(q3(t))*z_m(q2(t))*z_m(q1(t))
 Rdot = simplify(diff(R, t))
 Rdot1 = simplify(subs(Rdot, [diff(q1(t),t),diff(q2(t),t),diff(q3(t),t)], [alpha,beta,gamma]))
 Rdot2 = simplify(subs(Rdot1, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
@@ -24,7 +24,7 @@ w = skewTovec(skews)
 x = [alpha, beta, gamma]
 A = equationsToMatrix(w, x)
 
-ObtainfromOrientation(R, 'YZY', [t, q1(t), q2(t), q3(t), alpha, beta, gamma, d1, d2, d3], 'RPY')
+ObtainfromOrientation(R, 'YZX', [t, q1(t), q2(t), q3(t), alpha, beta, gamma, d1, d2, d3], 'RPY')
 
 % Jac = [-sin(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*cos(q1)*sin(q2) -l3*cos(q1)*sin(q3);
 %       cos(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*sin(q1)*sin(q2) -l3*sin(q1)*sin(q3);
@@ -173,6 +173,18 @@ function ObtainfromOrientation(R, seq, vars, typ)
     end
 
     A = equationsToMatrix(w, x)
+    
+    display('find singularities \n')
+    d = simplify(det(A))
+    solution = solve(d, 0)
+    
+    display('A with singularities')
+    Asing = subs(A, d2, pi/2)
+
+    display('angular velocity not realizable (not belong to R(tphi))')
+    null(Asing.')
+    display('time derivatives that generate zero angular velocity (belongs to N(tphi))')
+    null(Asing)
 
 end
 
