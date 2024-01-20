@@ -6,19 +6,18 @@ syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2
 syms alpha beta gamma
 
 %% Newton
-q0 = pi/4*[-1;1;1];
-r = [L*cos(q1) + N*cos(q1+q2)*cos(q3);
-     L*sin(q1) + N*sin(q1+q2)*cos(q3);
-     M + N*sin(q3)]
+q0 = [deg2rad(-70);deg2rad(100)];
+r = [L*cos(q1) + N*cos(q1+q2);
+     L*sin(q1) + N*sin(q1+q2)]
 
 % display('as far as the det is not 0 you are ok !')
 % jacobian(r, [q1,q2,q3])
 % simplify(det(jacobian(r, [q1,q2,q3])))
-r = subs(r, [L,M,N], [0.5,0.5,0.5])
-pos = [0.3; -0.3; 0.7]
-
-error = 1e-3
-NewtonMethod(r, q0, pos, error, [q1,q2,q3])
+r = subs(r, [L,N], [0.5,0.4])
+pos = [0.4; -0.3]
+kmax = 3
+error = 1e-4
+NewtonMethod(r, q0, pos, error, kmax, [q1,q2])
 
 %% Gradient
 
@@ -47,20 +46,20 @@ GradientMethod(r, q0, pos, 0.7, error, minjoint, limitcount, [q1,q2,q3])
 
 
 
-
-function NewtonMethod(r, q0, pos, error, param)
+%%
+function NewtonMethod(r, q0, pos, error, kmax, param)
     display('START Newton Method')
-    e = [1;1;1];
+    e = [1;1]; % change this size according to the problem
     counter = 0;
     qi = q0;
     final = [q0];
     errornorms = [];
-    while norm(e) >= error
+    while norm(e) >= error && counter <= kmax
         display(counter)
         j = jacobian(r, param);
         jac = subs(j, param, qi.');
         err = pos - subs(r, param, qi.');
-        n = size(jac);
+        n = size(jac)
 
         if ~isequal(n(1), n(2))
             display('Redundant')
@@ -80,10 +79,13 @@ function NewtonMethod(r, q0, pos, error, param)
     final
     errornorms
     y_plot = [0:counter-1];
-    plot(y_plot, errornorms, LineWidth=1.5)
+    % sometimes plot with log10 scale
+    plot(y_plot, log10(errornorms), LineWidth=1.5)
     title('Convergence Newton Method')
     grid on,xlabel('iterations'), ylabel('error norm')
-    double(qf)
+    qf = double(final(:,4))
+    display("check if you failed convergence or not with your fixed num of iterations")
+    norm(double(subs(r, param, double(qf.'))) - pos) <= error
 end
 
 function GradientMethod(r, q0, pos, a, error, minjointincrem, limitcount, param)
