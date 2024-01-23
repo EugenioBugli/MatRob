@@ -46,6 +46,40 @@ title('Accelleration')
 xlabel('s')
 ylabel('m/s^2')
 
+%% Ellipse
+syms s a b
+p = [-a*sin(2*pi*s); b*cos(2*pi*s)]
+p = subs(p, [a,b], [1, 0.3])
+
+
+subplot(3,1,1)
+fplot(p, LineWidth=1.5)
+
+title('Position')
+xlabel('s')
+ylabel('m')
+grid on
+xlim([0 1])
+
+pdot = diff(p, s)
+subplot(3,1,2)
+fplot(pdot, LineWidth=1.5)
+
+title('Velocity')
+xlabel('s')
+ylabel('m/s')
+grid on
+xlim([0 1])
+
+pddot = diff(pdot, s)
+subplot(3,1,3)
+fplot(pddot, LineWidth=1.5)
+
+title('Accelleration')
+xlabel('s')
+ylabel('m/s^2')
+grid on
+xlim([0 1])
 %% Bang Coast Bang  = Rest to Rest
 syms t
 
@@ -83,3 +117,106 @@ pos = piecewise(intervals(1),sigmaddot(1),intervals(2),sigmaddot(2),intervals(3)
 subplot(3,1,3)
 fplot(pos, LineWidth=1.5)
 grid on, xlabel('t'), ylabel('ddx(t)'), title('Accelleration')
+
+%% quintic polynomial
+clc
+syms t T V1 V2 A1 A2
+
+qin = [45; -100]
+qfin = [-90; 100]
+deltaq = qfin - qin
+T = 3;
+display('Always check the unit measures!')
+V1 = 120;
+V2 = 180;
+A1 = 150;
+A2 = 200;
+
+display('Change the number of Joint accordingly to your problem!')
+
+joints = [q1,q2];
+legnd = string(joints)
+num_joints = size(joints);
+Vmax = [V1, V2];
+Amax = [A1, A2];
+
+poly3 = qin + deltaq*(-2*(t/T)^3 + 3*(t/T)^2);
+poly5 = qin + deltaq*(10*(t/T)^3 - 15*(t/T)^4 + 6*(t/T)^5);
+poly7 = qin + deltaq*(-20*(t/T)^7 + 70*(t/T)^6 - 84*(t/T)^5 + 35*(t/T)^4);
+
+% specify here your polynomial
+T = 3;
+poly = poly5
+
+polydot = diff(poly, t)
+polyddot = diff(polydot, t)
+
+for num=1:num_joints(2)
+    
+    subplot(3,1,1)
+    fplot(poly(num), LineWidth=1.5)
+    title('Position')
+    xlabel('time [s]')
+    ylabel('m')
+    grid on
+    xlim([0 T])
+    hold on
+    if num == num_joints(2)
+        legend(legnd)
+        hold off
+    end
+
+    subplot(3,1,2)
+    fplot(polydot(num), LineWidth=1.5)
+    title('Velocity')
+    xlabel('time [s]')
+    ylabel('m/s')
+    grid on
+    xlim([0 T])
+    ylim([-max(Vmax+10), max(Vmax+10)])
+    hold on
+    if num == num_joints(2)
+        fplot([Vmax, -Vmax], "-.", LineWidth=1)
+        hold off
+    end
+
+    subplot(3,1,3)
+    fplot(polyddot(num),LineWidth=1.5)
+    title('Accelleration')
+    xlabel('time [s]')
+    ylabel('m/s^2')
+    grid on
+    xlim([0 T])
+    ylim([-max(Amax+10), max(Amax+10)])
+    hold on
+    if num == num_joints(2)
+        fplot([Amax, -Amax], "-.", LineWidth=1)
+        hold off
+    end
+end
+
+tvel = T/2;
+qdot = abs(double(subs(polydot, [t], [tvel])));
+
+tacc = (0.5 + sqrt(3)/6)*T;
+qddot = abs(double(subs(polyddot, [t], [tacc])));
+
+% check if you have rad and you need deg and vice-versa
+% % qdot(1) = rad2deg(qdot(1))
+% % qddot(1)  = rad2deg(qddot(1))
+
+% check bounds 
+qdot <= Vmax.'
+qddot <= Amax.'
+
+% if we are satisfying Vel and Acc bounds --> decrease time 
+k_min_vel = Vmax.' ./ qdot;
+k_min_acc = sqrt(Amax.' ./ qddot);
+k_min = min(min(k_min_vel), min(k_min_acc))
+T_min = T/k_min
+
+%  if we are NOT satisfying Vel and Acc bounds --> increase time 
+k_max_vel = qdot ./ Vmax.';
+k_max_acc = sqrt(qddot ./ Amax.');
+k_max = max(max(k_max_vel), max(k_max_acc))
+T_max = k_max*T 

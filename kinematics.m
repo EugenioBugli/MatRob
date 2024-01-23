@@ -10,21 +10,59 @@ clc
 format long
 syms q1 q2 q3 q4 q5 q6
 syms a1 a2 a3 a4
-syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2
-syms t q1(t) q2(t) q3(t) alpha beta gamma
+syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2 t e a
+syms t Q1(t) Q2(t) Q3(t) alpha beta gamma
 
-R = y_m(q3(t))*z_m(q2(t))*z_m(q1(t))
-Rdot = simplify(diff(R, t))
-Rdot1 = simplify(subs(Rdot, [diff(q1(t),t),diff(q2(t),t),diff(q3(t),t)], [alpha,beta,gamma]))
-Rdot2 = simplify(subs(Rdot1, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
-R2 = simplify(subs(R, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
-skews = simplify(Rdot2* R2.')
-w = skewTovec(skews)
+%% Geometric Jacobian
+T04 = simplify(direct(sym([q1,q2,0,q4]),sym([pi/2,pi/2,-pi/2,0]),[0,0,q3,0],[0,0,0,a4],4));
+jL = jacobian(T04(1:3,4), [q1,q2,q3,q4])
+jA = [0 sin(q1) 0 sin(q1); 0 -cos(q1) 0 -cos(q1); 1 0 0 0]
 
-x = [alpha, beta, gamma]
-A = equationsToMatrix(w, x)
+geom = [jL; jA]
 
-ObtainfromOrientation(R, 'YZX', [t, q1(t), q2(t), q3(t), alpha, beta, gamma, d1, d2, d3], 'RPY')
+T01 = direct(sym([q1]),sym([pi/2]),[A],[B],1);
+R01 = T01(1:3,1:3)
+
+geom1 = simplify([R01.'*jL; R01.'*jA])
+
+null(geom1.')
+
+simplify(det(geom1.'*geom1) == 0)
+
+geomsing = subs(geom1, [q3], [0])
+
+simplify(null(geomsing.'))
+%%
+clc
+% % % % J = jacobian(p, [q1,q2,q3])
+% % % % 
+% % % % Jd = DerivMatrix(J, [q1,q2,q3], [alpha, beta, gamma])
+
+Rin = [0.5, 0, -sqrt(3)/2; -sqrt(3)/2 0 -0.5; 0 1 0]
+Rfin = [sqrt(2)/2, -sqrt(2)/2, 0; -0.5, -0.5, -sqrt(2)/2; 0.5, 0.5, -sqrt(2)/2]
+
+R = Rin.' * Rfin
+
+T = [[1;0;0], x_m(alpha)*[0;1;0], x_m(alpha)*y_m(beta)*[0;0;1]]
+Ts = simplify(subs(T, [alpha, beta, gamma], [3*pi/4, 0, pi/4]))
+phidot = inv(Ts)*[3;-2;1]
+deltaphi = [3*pi/4 - pi/2; pi/3; pi/4]
+
+a3 = 10 - double(4*phidot./deltaphi)
+a4 = -15 + 7*double(phidot./deltaphi)
+a5 = 6- 3*double(phidot./deltaphi)
+% % % % R = y_m(q3(t))*z_m(q2(t))*z_m(q1(t))
+% % % % Rdot = simplify(diff(R, t))
+% % % % Rdot1 = simplify(subs(Rdot, [diff(q1(t),t),diff(q2(t),t),diff(q3(t),t)], [alpha,beta,gamma]))
+% % % % Rdot2 = simplify(subs(Rdot1, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
+% % % % R2 = simplify(subs(R, [q1(t),q2(t),q3(t)], [d1, d2, d3]))
+% % % % skews = simplify(Rdot2* R2.')
+% % % % w = skewTovec(skews)
+% % % % 
+% % % % x = [alpha, beta, gamma]
+% % % % A = equationsToMatrix(w, x)
+% % % % 
+% % % % ObtainfromOrientation(R, 'YZX', [t, q1(t), q2(t), q3(t), alpha, beta, gamma, d1, d2, d3], 'RPY')
 
 % Jac = [-sin(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*cos(q1)*sin(q2) -l3*cos(q1)*sin(q3);
 %       cos(q1)*(l2*cos(q2)+l3*cos(q3)) -l2*sin(q1)*sin(q2) -l3*sin(q1)*sin(q3);
@@ -98,6 +136,33 @@ ObtainfromOrientation(R, 'YZX', [t, q1(t), q2(t), q3(t), alpha, beta, gamma, d1,
 
 % v = [L*cos(q1); K*q1; L*sin(q1)]
 % simplify(norm(v))
+function A = DerivMatrix(M, vars, derv)
+    % add more joint if you need them and change this 3 vect accordingly
+    % double derivative may be wrong, don't use it
+    syms t Q1(t) Q2(t) Q3(t)
+
+    varst = [Q1(t), Q2(t), Q3(t)];
+    varstdot = [diff(Q1(t), t), diff(Q2(t), t), diff(Q3(t), t)];
+    % varstddot = [diff(Q1(t), t, t), diff(Q2(t), t, t), diff(Q3(t), t, t)];
+
+    mt = subs(M, vars, varst);
+
+    mtdot = diff(mt, t);
+    mtddot = diff(mtdot, t);
+
+    mtd = subs(mtdot, varstdot, derv);
+    % mtdd = subs(mtddot, varstddot, derv);
+    
+    display("First Derivative")
+    mtd = subs(mtd, varst, vars)
+
+    % display("Second Derivative")
+    % mtdd = subs(mtdd, varst, vars)
+    
+    A = mtd;
+    % B = mtdd;
+end
+
 function ObtainfromOrientation(R, seq, vars, typ)
     display('If RPY double check the correct order!')
     t = vars(1);
@@ -188,9 +253,6 @@ function ObtainfromOrientation(R, seq, vars, typ)
 
 end
 
-function mat = GeometricJacobian(pos, param)
-end
-
 function mat = AnalyticJacobian(pos, param)
     display('Normal Jacobian')
     mat = jacobian(pos, param)
@@ -203,12 +265,14 @@ function mat = AnalyticJacobian(pos, param)
 end
 
 function mat = direct(theta,alpha,d,a,num)
-
+    display("Matrix T01")
     mat = dh(alpha(1),theta(1),d(1),a(1))
 
     for i = 2:num
+        display("Matrix T"+int2str(i-1)+":"+i)
         dh(alpha(i),theta(i),d(i),a(i))
-        mat = mat * dh(alpha(i),theta(i),d(i),a(i));
+        display("Matrix T0"+i)
+        mat = mat * dh(alpha(i),theta(i),d(i),a(i))
         simplify(mat);
     end
 end

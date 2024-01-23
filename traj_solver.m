@@ -103,7 +103,93 @@ for num = 1:3
     hold on
 end
 
+%% cubic example 2R
 
+deltaq = qfin - qin
+qi = qin + deltaq*(a*t^3 + b*t^2 + c*t + d)
+param = [q1, q2]
+m = size(param)
+fprintf("Solver \n")
+for num = 1:m
+    if isequal(deltaq(num),0.0)
+        display("No changes for joint q"+num)
+
+        p = qs(num)
+        subplot(3,1,1)
+        fplot(p, LineWidth=1.5)
+        title('Position')
+        xlabel('s')
+        ylabel('m')
+        xlim([0 T])
+        grid on
+        hold on
+
+        pdot = diff(p)
+        subplot(3,1,2)
+        fplot(0, LineWidth=1.5)
+
+        title('Velocity')
+        xlabel('s')
+        ylabel('m/s')
+        xlim([0 T])
+        grid on
+        hold on
+
+        pddot = diff(pdot)
+        subplot(3,1,3)
+        fplot(0, LineWidth=1.5)
+
+        title('Accelleration')
+        xlabel('s')
+        ylabel('m/s^2')
+        xlim([0 T])
+        grid on
+        hold on
+        break
+
+    end
+    
+    A1 = vpa( (qdot0(num)*T) / deltaq(num) )
+    eq1 = a3 + a4 + a5 == 1 - A1;
+    eq2 = 3*a3 + 4*a4 + 5*a5 == -A1;
+    eq3 = 3*a3 + 6*a4 + 10*a5 == 0;
+    [A, b] = equationsToMatrix([eq1;eq2;eq3], [a3,a4,a5]);
+    display("Solution for q"+num)
+    sol = inv(A)*b
+
+    p = qs(num) + deltaq(num)*(A1*(t/T) + sol(1)*(t/T)^3 + sol(2)*(t/T)^4 + sol(3)*(t/T)^5)
+    subplot(3,1,1)
+    fplot(p, LineWidth=1.5)
+
+    title('Position')
+    xlabel('s')
+    ylabel('m')
+    xlim([0 T])
+    grid on
+    hold on
+
+    pdot = diff(p, t)
+    subplot(3,1,2)
+    fplot(pdot, LineWidth=1.5)
+
+    title('Velocity')
+    xlabel('s')
+    ylabel('m/s')
+    xlim([0 T])
+    grid on
+    hold on
+
+    pddot = diff(pdot, t)
+    subplot(3,1,3)
+    fplot(pddot, LineWidth=1.5)
+
+    title('Accelleration')
+    xlabel('s')
+    ylabel('m/s^2')
+    xlim([0 T])
+    grid on
+    hold on
+end
 
 
 

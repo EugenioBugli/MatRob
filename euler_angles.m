@@ -11,9 +11,16 @@ syms alpha beta gamma
 
 display("Remember to use inverse order if the axes are fixed (i.e RPY angles)")
 display("You may use wrapToPi to transform your angles in [-pi,pi] (note that we use (-pi,pi])")
-y_m(gamma)
-x_m(alpha)
-y_m(gamma)*z_m(beta)
+
+Rin = [0.5, 0, -sqrt(3)/2; -sqrt(3)/2 0 -0.5; 0 1 0]
+Rfin = [sqrt(2)/2, -sqrt(2)/2, 0; -0.5, -0.5, -sqrt(2)/2; 0.5, 0.5, -sqrt(2)/2]
+
+R = Rin.' * Rfin
+
+rot_eul(Rfin, 'XYZ')
+[a, b] = rotm2eul(Rin, 'XYZ')
+rad2deg(a)
+rad2deg(b)
 
 % R = [0 -sqrt(2)/2 sqrt(2)/2;
 %     1 0 0;
