@@ -1,5 +1,8 @@
-syms t omega
-
+syms t omega R
+r = [R*cos(omega*t); R*sin(omega*t); omega*t]
+rdot = diff(r,t)
+rddot = diff(rdot, t)
+%%
 p = 3+ [sin(2*t); 1.5*sin(t)]
 subplot(5,1,1)
 fplot(p(1), p(2), LineWidth=1.5)

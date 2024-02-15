@@ -4,21 +4,26 @@ syms theta
 syms psi
 syms alpha beta gamma
 
-% mat1 = z_m(phi);
-% mat2 = y_m(theta);
-% mat3 = x_m(psi);
-% mat1*mat2*mat3
+mat1 = y_m(deg2rad(45));
+mat2 = x_m(deg2rad(-45));
+mat3 = y_m(deg2rad(120));
+
+R0i = mat1*mat2*mat3
+
+R0f = [0 sin(pi/3) cos(pi/3); 0 cos(pi/3) -sin(pi/3); -1 0 0]
+
+Rif = R0i.'*R0f
 
 display("Remember to use inverse order if the axes are fixed (i.e RPY angles)")
 display("You may use wrapToPi to transform your angles in [-pi,pi] (note that we use (-pi,pi])")
 
-Rin = [0.5, 0, -sqrt(3)/2; -sqrt(3)/2 0 -0.5; 0 1 0]
-Rfin = [sqrt(2)/2, -sqrt(2)/2, 0; -0.5, -0.5, -sqrt(2)/2; 0.5, 0.5, -sqrt(2)/2]
+Rin = [0 1 0; 0.5 0 sqrt(3)/2; sqrt(3)/2 0 -0.5]
+% Rfin = [sqrt(2)/2, -sqrt(2)/2, 0; -0.5, -0.5, -sqrt(2)/2; 0.5, 0.5, -sqrt(2)/2]
+% 
+% R = Rin.' * Rfin
 
-R = Rin.' * Rfin
-
-rot_eul(Rfin, 'XYZ')
-[a, b] = rotm2eul(Rin, 'XYZ')
+rot_eul(Rin, 'YXZ')
+[a, b] = rotm2eul(Rin, 'YXZ')
 rad2deg(a)
 rad2deg(b)
 

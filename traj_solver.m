@@ -191,9 +191,163 @@ for num = 1:m
     hold on
 end
 
+%% Over-Fly
+syms t
+
+A = [3;3]
+B = [1;9]
+C = [8;9]
+v1 = 1
+v2 = 2
+deltaT = 4
+
+kab = (B-A) / norm(B-A)
+kbc = (C-B) / norm(C-B)
+
+Aprime = B - (v1*deltaT*kab)/2
+
+d1 = 0.5*v1*deltaT
+d2 = 0.5*v2*deltaT
+
+Cprime = B + d2*kbc
+
+t = linspace(0, deltaT);
+
+poft = Aprime + v1*kab*(t) + 0.5*(t).^2.*(v2*kbc - v1*kab)/deltaT;
+
+% poftdot = diff(poft, t);
+% 
+% poftddot = diff(poftdot, t);
+
+plot(A(1),A(2),'MarkerEdge',[0.8500 0.3250 0.0980], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+hold on
+plot(B(1),B(2),'MarkerEdge',[0.8500 0.3250 0.0980], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+hold on
+plot(C(1),C(2),'MarkerEdge',[0.8500 0.3250 0.0980], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+hold on
+plot(Aprime(1),Aprime(2),'MarkerEdge',[0.6350 0.0780 0.1840], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+hold on
+plot(Cprime(1),Cprime(2),'MarkerEdge',[0.6350 0.0780 0.1840], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+hold on
+
+plot([1 8], [9 9],'k', 'LineWidth', 1.3)
+hold on
+
+plot([3 1], [3 9],'k', 'LineWidth', 1.3)
+hold on
+
+% plot([Aprime(1) Cprime(1)], [Aprime(2) Cprime(2)],'r', 'LineWidth', 1.3)
+% hold on
+
+poft
+for i=1:2:199
+    elem = poft(i:i+1)
+    plot(elem(1), elem(2),'MarkerEdge',[1 0 0], 'LineWidth', 1, 'Marker','.', 'MarkerSize', 18)
+end
+
+% subplot(3,1,1)
+% fplot(poft, LineWidth=1.5)
+% 
+% title('Cartesian Path')
+% xlabel('s')
+% ylabel('(m)')
+% xlim([0,deltaT])
+% grid on
+% 
+% subplot(3,1,2)
+% fplot(poftdot, LineWidth=1.5)
+% 
+% title('Cartesian Path')
+% xlabel('s')
+% ylabel('(m/s)')
+% xlim([0,deltaT])
+% grid on
+% 
+% subplot(3,1,3)
+% fplot(poftddot, LineWidth=1.5)
+% 
+% title('Cartesian Path')
+% xlabel('s')
+% ylabel('(m/s^2)')
+% xlim([0,deltaT])
+% grid on
 
 
+%% Rendez-vous
+syms t x w
+l1 = 0.5
+l2 = 0.4
+P = [-0.8; 1.1]
+
+plot(P(1),P(2),'MarkerEdge',[0.8500 0.3250 0.0980], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+grid on
+hold on
+xline(0)
+yline(0)
+r= l1 + l2 ;
+theta=-pi:0.001:pi;
+x=r*cos(theta);
+y=r*sin(theta);
+plot(x,y,"k-", 'LineWidth', 0.6)
+val = (-0.8*tand(-20) - 1.1)/tand(-20)
+plot([-0.8 val], [1.1 0],'MarkerEdge',[0, 0, 1], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+
+k = 0.8*tand(-20) + 1.1
+m = tand(-20)
+[xo, yo]=linecirc(m, k, 0, 0, 0.9)
+
+intr1 = [xo(1) yo(1)]
+intr2 = [xo(2) yo(2)]
+plot(intr1(1),intr1(2),'MarkerEdge',[0.8500 0.3250 0.0980], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+plot(intr2(1),intr2(2),'MarkerEdge',[0.8500 0.3250 0.0980], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
+
+r= 0.6;
+theta=-pi:0.001:pi;
+x=r*cos(theta)+intr2(1);
+y=r*sin(theta)+intr2(2);
+plot(x,y,"k-", 'LineWidth', 0.6)
+
+[xo, yo] = linecirc(m,k, intr2(1), intr2(2), 0.6)
+intrRV2 = [xo(2) yo(2)]
+plot(intrRV2(1),intrRV2(2),'MarkerEdge',[1 0.3250 0.0980], 'LineWidth', 2, 'Marker','.', 'MarkerSize', 25)
 
 
+%%
+syms t T
 
+q1 = pi/4 + (pi/4)*(3*(t/T)^2 - 2*(t/T)^3)
+q2 = (-pi/2)*(1 - cos((pi*t)/T))
+
+p1i = subs(q1, t, 0)
+p1f = subs(q1, t, T)
+
+p2i = subs(q2, t, 0)
+p2f = subs(q2, t, T)
+
+display('Vel')
+
+q1dot = diff(q1,t)
+q2dot = diff(q2,t)
+
+p1idot = subs(q1dot, t, 0)
+p1fdot = subs(q1dot, t, T)
+
+p2idot = subs(q2dot, t, 0)
+p2fdot = subs(q2dot, t, T)
+
+display('Acc')
+
+q1ddot = diff(q1dot,t)
+q2ddot = diff(q2dot,t)
+
+p1iddot = subs(q1ddot, t, 0)
+p1fddot = subs(q1ddot, t, T)
+
+p2iddot = subs(q2ddot, t, 0)
+p2fddot = subs(q2ddot, t, T)
+
+display('Jerk')
+
+q1dddot = diff(q1ddot,t)
+q2dddot = diff(q2ddot,t)
 

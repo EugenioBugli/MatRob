@@ -13,6 +13,18 @@ syms a1 a2 a3 a4
 syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2 t e a
 syms t Q1(t) Q2(t) Q3(t) alpha beta gamma
 
+%%
+
+mat1 = y_m(deg2rad(45));
+mat2 = x_m(deg2rad(-45));
+mat3 = y_m(deg2rad(120));
+
+R0i = mat1*mat2*mat3
+
+R0f = [0 sin(pi/3) cos(pi/3); 0 cos(pi/3) -sin(pi/3); -1 0 0]
+
+Rif = R0i.'*R0f
+
 %% Geometric Jacobian
 T04 = simplify(direct(sym([q1,q2,0,q4]),sym([pi/2,pi/2,-pi/2,0]),[0,0,q3,0],[0,0,0,a4],4));
 jL = jacobian(T04(1:3,4), [q1,q2,q3,q4])
@@ -32,6 +44,26 @@ simplify(det(geom1.'*geom1) == 0)
 geomsing = subs(geom1, [q3], [0])
 
 simplify(null(geomsing.'))
+%%
+T03 = simplify(direct(sym([q1,q2,q3]), sym([pi/2,0,pi/2]), [d1,0,0], [a1,a2,a3], 3))
+
+pos = [T03(1:2,4); q1+q2+q3]
+
+JL = simplify(jacobian(pos, [q1,q2,q3]))
+R01 = z_m(q1)
+JL1 = simplify(R01.'*JL)
+JL1 = subs(JL1, [q2], [0])
+rank(JL1)
+
+JA = [0 sin(q1) sin(q1); 0 -cos(q1) -cos(q1); 1 0 0]
+
+colspace(JA)
+p0L = [L*cos(q1)*cos(q2+q3); L*sin(q1)*sin(q2+q3); -L*cos(q2+q3)]
+simplify(jacobian(p0L, [q1,q2,q3]))
+JL = double(subs(JL, [q1,q2,q3,a1,a2,a3,d1], [0, pi/2, 0, 0.04, 0.445, 0.04, 0.52]))
+JL*[0; pi/4; pi/2]
+%%
+T04 = simplify(direct(sym([q1, pi/2, pi/2, q4]),sym([pi/2, pi/2, pi/2, 0]),[0, q2, q3, 0],[0,0,0,L],4))
 %%
 clc
 % % % % J = jacobian(p, [q1,q2,q3])

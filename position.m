@@ -2,7 +2,21 @@ syms phi
 syms theta
 syms psi
 syms a
+%%
+mat1 = y_m(deg2rad(45));
+mat2 = x_m(deg2rad(-45));
+mat3 = y_m(deg2rad(120));
 
+R0i = mat1*mat2*mat3
+
+R0f = [0 sin(pi/3) cos(pi/3); 0 cos(pi/3) -sin(pi/3); -1 0 0]
+
+Rif = R0i.'*R0f
+
+inv_pos(Rif)
+
+w = 1.1*[0.5170; -0.3752; 0.7694]
+%%
 % vector invariant to rotation --> eigenvector of eigenvalue 1 : [V,D] =
 % eig(rot) where D return diagonal matrix with eigenvalues, while V
 % represent the eigenvectors of the 3 eigenvalues.
