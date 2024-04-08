@@ -13,6 +13,8 @@ syms a1 a2 a3 a4
 syms d0 d1 d2 d3 d4 de l1 l2 l3 l4 N L M N d A B C D K dtcp h p L1 L2 t e a
 syms t Q1(t) Q2(t) Q3(t) alpha beta gamma
 
+T03 = simplify(direct(sym([q1,q2,q3]),sym([0,pi/2,0]),[0,d2,0],[a1,0,a3],3));
+
 %%
 
 mat1 = y_m(deg2rad(45));

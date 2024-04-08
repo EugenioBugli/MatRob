@@ -1,18 +1,26 @@
 clc
 
-a1 = 1; 
-a2 = 0.5; 
-% a3 = 0.2;
-DH1(1) = Link([0 0 a1 0]);
-DH1(2) = Link([0 0 a2 0]);
-% DH(3) = Link([0 0 a3 0]);
-th1 = (0:0.01:pi/2) ;
-th2 = (-pi/2:0.01:pi/2);
-% th3 = (-pi/2:0.05:pi/2) ;
-q = {th1,th2};
+% a1 = 1; 
+% a2 = 0.5; 
+% % a3 = 0.2;
+% DH1(1) = Link([0 0 a1 0]);
+% DH1(2) = Link([0 0 a2 0]);
+% % DH(3) = Link([0 0 a3 0]);
+% th1 = (0:0.01:pi/2) ;
+% th2 = (-pi/2:0.01:pi/2);
+% % th3 = (-pi/2:0.05:pi/2) ;
+% q = {th1,th2};
+% 
+% % full plot (remember to modify the function and delete the color parameter
+% plotworkspace(DH1, q)
 
-% full plot (remember to modify the function and delete the color parameter
-plotworkspace(DH1, q)
+DH2(1) = Link([pi/2 0.7 0 0])
+DH2(2) = Link([0 0 0.5 0])
+DH2(3) = Link([0 0 0.5 0])
+th1 = (0:0.01:2*pi) ;
+th2 = (0:0.01:2*pi);
+th3 = (0:0.01:2*pi) ;
+plotworkspace(DH2, {th1,th2,th3})
 
 % to use this add the color parameter
 

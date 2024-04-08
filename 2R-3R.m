@@ -1,33 +1,46 @@
 clc
 format long
-syms q1 q2 q3
+syms q1 q2 q3 q4
 syms a1 a2 a3 a4
 syms l1 l2 l3
 syms alpha beta gamma
 
+pos = [l1 - l2*cos(q1); -l2*sin(q1); 2*q1 + q2]
+posmin = [l1 - l2*cos(q1); -l2*sin(q1); pi + q1]
+
+J = jacobian(pos, [q1,q2,q3,q4])
+
+rank(J)
+
+Jmin = jacobian(posmin, [q1,q2,q3,q4])
+
+rank(Jmin)
 
 %% 2R
 
 % direct kine
 pos = [l1*cos(q1) + l2*cos(q1+q2); l1*sin(q1) + l2*sin(q1+q2)] 
 % jacobian
-po = subs(pos, [l1,l2], [1,1])
-J = jacobian(po, [q1,q2])
+% po = subs(pos, [l1,l2], [1,1])
+% J = jacobian(po, [q1,q2])
 
 
-posfin = [0.3708; 0.6739]
-l1 = 0.5
-l2 = 0.4
+posfin = [5; 1]
+l1 = 2
+l2 = 1
+
 inverskine_2(posfin,l1,l2)
 
 %% 3R
 clc
 % direct kine
-r = [l1*cos(q1) + l2*cos(q1+q2) + l3*cos(q1+q2+q3); l1*sin(q1) + l2*sin(q1+q2) + l3*sin(q1+q2+q3); q1+q2+q3]
+r = [l1*cos(q1) + l2*cos(q1+q2) + l3*cos(q1+q2+q3); l1*sin(q1) + l2*sin(q1+q2) + l3*sin(q1+q2+q3)]%; q1+q2+q3]
+r = l1*[cos(q1) + cos(q1+q2) + cos(q1+q2+q3); sin(q1) + sin(q1+q2) + sin(q1+q2+q3)]
 % pos = subs(pos, [l1,l2,l3], [0.5,0.5,0.25])
 % pos0 = subs(pos, [q1,q2,q3], [pi/2, -pi/3, 0])
 J = jacobian(r, [q1,q2,q3])
-Jsub = subs(J, [q1,q2,q3,l1,l2,l3], [pi/2, -pi/3, 0,0.5,0.5,0.25])
+Jsub = subs(J, [q1,q2,q3,l1], [0,0,pi/2,0.5])
+pinv(Jsub)
 qdot0m = [-pi/6; 0; -pi/2]
 v0m = Jsub*qdot0m
 double(v0m)
