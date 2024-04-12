@@ -1,8 +1,6 @@
 clear
 clc
 syms m1 m2 m3 m4 real
-syms q1 q2 q3 q4 real
-syms a1 a2 a3 a4 a5 a6 real
 syms q1dot q2dot q3dot q4dot real
 
 
@@ -19,38 +17,31 @@ T4 = 0.5*m4*sq_norm(vc4)
 
 T = simplify(expand(T1+T2+T3+T4))
 
-% qdot = [q1dot; q2dot; q3dot; q4dot];
+qdot = [q1dot; q2dot; q3dot; q4dot];
 
-% M = getInertiaMatrix(T, qdot)
+M = getInertiaMatrix(T, qdot)
 
-qdot = [q1dot; q2dot; q3dot];
-q = [q1, q2, q3];
+M = a1 + 2*a2 + a3*q2dot^2 + s*a4*q2*sin(q3) + a5*(sin(q3))^2 0 0;
+    
 
-M = [a1 + 2*a2*q2 + a3*q2^2 + 2*a4*q2*sin(q3) + a5*(sin(q3))^2, 0, 0;
-    0, a3, a4*cos(q3);
-    0, a4*cos(q3), a6]
+c = getCorio_Centrif(M, qdot)
 
-c = getCorio_Centrif(M, qdot, q)
-
-function c = getCorio_Centrif(M, qd, q)
-    disp("Coriolis terms: i!=j");
-    disp("Centrifugal terms: i=j");
-    c = simplify(getChristoffel(M, qd, q));
+function c = getCorio_Centrif(M, qd)
+    c = simplify(getChristoffel(M,qd));
 end
 
-function C = getChristoffel(M, qd, q)
-    s = size(M,2);
-    C = sym(zeros(s,1));
+function C = getChristoffel(M, qd)
+    s = size(M,1);
+    C = [];
     for i=1:s
-        Mkdiff = jacobian(M(:,i), q);
-        res = 0.5 * qd.' * ( Mkdiff + Mkdiff.' - diff(M, q(i)) ) * qd;
-        C(i) = simplify(res);
+        Mkdiff = jacobian(M(:,i), qd);
+        res = 0.5 * qd.' * ( Mkdiff + Mkdiff.' - diff(M, qd(i)) ) * qd;
+        C = [C ; simplify(res)];
     end
 end
 
 function M = getInertiaMatrix(T, q)
     s = size(q,1);
-    M = sym(zeros(s));
     for i=1:s
         for j=i:s
             if i == j
