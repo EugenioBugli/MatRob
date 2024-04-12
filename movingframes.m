@@ -1,4 +1,4 @@
-clear all
+clear
 clc
 
 syms q1 q2 q3 q4 real
@@ -11,6 +11,13 @@ syms Ic1xx Ic2xx Ic3xx Ic4xx real
 syms Ic1yy Ic2yy Ic3yy Ic4yy real
 syms Ic1zz Ic2zz Ic3zz Ic4zz real
 
+% use diag matrices for each joint then multiply
+
+Ic1 = diag([Ic1xx, Ic1yy, Ic1zz]);
+Ic2 = diag([Ic2xx, Ic2yy, Ic2zz]);
+Ic3 = diag([Ic3xx, Ic3yy, Ic3zz]);
+Ic4 = diag([Ic4xx, Ic4yy, Ic4zz]);
+
 alpha = [0,0];
 a = [l1, l2];
 d = [0, 0];
@@ -21,7 +28,8 @@ DH = [sym(alpha); a; d; sym(theta)];
 sig = [0,0]; % fill these values with 0 if your joint is Prismatic, otherwise fill with 0
 qdot = [dq1,dq2];
 mass = [m1,m2];
-iner = [Ic1xx, Ic2xx];
+iner = [Ic1 Ic2];
+
 COM_Pos = [[-l1 + d1;0;0],[-l2 + d2;0;0]];
 
 VEL = comp_velocities(DH, sig, qdot);
@@ -50,7 +58,7 @@ function T = comp_kine(ang, lin, mass, iner)
     T = 0;
     for i=1:num
         lin_part = 0.5*mass(i)*sq_norm(lin(:,i));
-        ang_part = 0.5*iner(i)*sq_norm(ang(:,i));
+        ang_part = 0.5*ang(:,i).'*iner(:,(1 + (3*(i-1))):(3 + (3*(i-1))))*ang(:,i);
         Ti = simplify(lin_part + ang_part);
         T = simplify(T + lin_part + ang_part);
     end
