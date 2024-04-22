@@ -1,3 +1,9 @@
+% 
+% 
+% Author: Eugenio Bugli
+% April 2024
+% 
+% 
 clear
 clc
 
@@ -11,37 +17,45 @@ syms Ic1xx Ic2xx Ic3xx Ic4xx real
 syms Ic1yy Ic2yy Ic3yy Ic4yy real
 syms Ic1zz Ic2zz Ic3zz Ic4zz real
 
+% syms Ic1 Ic2 Ic3 Ic4 real % comment here if you need to use matrix form for Ici
+
+syms rc1x rc1y rc2x rc2y real
+
 % use diag matrices for each joint then multiply
 
 Ic1 = diag([Ic1xx, Ic1yy, Ic1zz]);
 Ic2 = diag([Ic2xx, Ic2yy, Ic2zz]);
 Ic3 = diag([Ic3xx, Ic3yy, Ic3zz]);
-Ic4 = diag([Ic4xx, Ic4yy, Ic4zz]);
+% Ic4 = diag([Ic4xx, Ic4yy, Ic4zz]);
 
-alpha = [0,0];
-a = [l1, l2];
-d = [0, 0];
-theta = [q1, q2];
+alpha = [0,pi/2,0];
+a = [l1, 0, l3];
+d = [0, l2, 0];
+theta = [q1, q2, q3];
 
 DH = [sym(alpha); a; d; sym(theta)];
 
-sig = [0,0]; % fill these values with 0 if your joint is Prismatic, otherwise fill with 0
-qdot = [dq1,dq2];
-mass = [m1,m2];
-iner = [Ic1 Ic2];
+sig = [0,0, 0]; % fill these values with 1 if your joint is Prismatic, otherwise fill with 0
+qdot = [dq1,dq2, dq3];
+mass = [m1,m2, m3];
+iner = [Ic1 Ic2 Ic3];
 
-COM_Pos = [[-l1 + d1;0;0],[-l2 + d2;0;0]];
+N = 3
 
-VEL = comp_velocities(DH, sig, qdot);
+% CoM position w.r.t origin of frame i:
+COM_Pos = [[-l1 + d1; 0; 0],[0; -l2 + d2; 0], [-l3 + d3; 0; 0]];
 
-AngVel = VEL(1:3,1:2)
-LinVel = VEL(1:3,3:4)
+VEL = comp_velocities(DH, sig, qdot)
+
+% change according to the number of joints (num of cols)
+AngVel = VEL(1:3,1:N)
+LinVel = VEL(1:3,(N+1):2*N)
 
 COM_Vel = comp_com_vel(AngVel, LinVel, COM_Pos)
 
 T = comp_kine(AngVel, COM_Vel, mass, iner)
 
-M = simplify(getInertiaMatrix(T, qdot))
+M = expand(simplify(getInertiaMatrix(T, qdot)))
 
 function CVel = comp_com_vel(ang, lin, pos)
     num = size(ang,2);
@@ -58,8 +72,15 @@ function T = comp_kine(ang, lin, mass, iner)
     T = 0;
     for i=1:num
         lin_part = 0.5*mass(i)*sq_norm(lin(:,i));
+
+        % use this if Ici is a matrix
         ang_part = 0.5*ang(:,i).'*iner(:,(1 + (3*(i-1))):(3 + (3*(i-1))))*ang(:,i);
-        Ti = simplify(lin_part + ang_part);
+
+        % use this if Ici it's just a scalar
+        % ang_part = 0.5*ang(:,i).'*iner(:,i)*ang(:,i);
+
+
+        Ti = simplify(lin_part + ang_part)
         T = simplify(T + lin_part + ang_part);
     end
 end
@@ -119,7 +140,7 @@ function val = sq_norm(vec)
 end
 
 function M = getInertiaMatrix(T, q)
-    s = size(q,2)
+    s = size(q,2);
     for i=1:s
         for j=i:s
             if i == j
